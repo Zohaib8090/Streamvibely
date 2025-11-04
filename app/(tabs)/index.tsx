@@ -1,10 +1,11 @@
 
 import { Colors } from '@/constants/Colors';
 import { Fonts } from '@/constants/Fonts';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { auth } from '@/firebase';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
-  FlatList,
   Image,
   SafeAreaView,
   ScrollView,
@@ -16,78 +17,67 @@ import {
 
 const playlists = [
   {
-    id: '1',
     title: 'Chill Vibes',
-    description: 'Relax and unwind with these m...',
-    image: 'https://picsum.photos/seed/picsum/200/300',
+    subtitle: 'Relax and unwind with these m...',
+    image: 'https://images.pexels.com/photos/1763075/pexels-photo-1763075.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
   },
   {
-    id: '2',
     title: 'Workout Beats',
-    description: 'High-energy tracks to power y...',
-    image: 'https://picsum.photos/seed/picsum/200/300',
+    subtitle: 'High-energy tracks to power y...',
+    image: 'https://images.pexels.com/photos/3757954/pexels-photo-3757954.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
   },
   {
-    id: '3',
+    title: 'Summer Hits',
+    subtitle: 'The hottest tracks of the se...',
+    image: 'https://images.pexels.com/photos/1493226/pexels-photo-1493226.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
+  },
+  {
     title: 'Focus Flow',
-    description: 'Stay productive with these tun...',
-    image: 'https://picsum.photos/seed/picsum/200/300',
+    subtitle: 'Instrumental tracks to help y...',
+    image: 'https://images.pexels.com/photos/3771835/pexels-photo-3771835.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
   },
 ];
 
 const HomeScreen = () => {
+  const router = useRouter();
+  const handleSignOut = async () => {
+    await auth.signOut();
+    router.replace('/(auth)/login');
+  };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.headerContainer}>
+        <View style={styles.header}>
           <Text style={styles.headerTitle}>Personalized Recommendations</Text>
-        </View>
-
-        <View style={styles.recommendationCard}>
-          <View style={styles.recommendationHeader}>
-            <MaterialCommunityIcons
-              name="star-four-points"
-              size={24}
-              color={Colors.light.tint}
-            />
-            <Text style={styles.recommendationTitle}>
-              Personalized Suggestions
-            </Text>
-          </View>
-          <Text style={styles.recommendationText}>
-            Our AI will recommend songs based on your listening history. The more
-            you listen, the better the recommendations.
-          </Text>
-          <TouchableOpacity style={styles.recommendationButton}>
-            <MaterialCommunityIcons
-              name="star-four-points"
-              size={20}
-              color={Colors.dark.text}
-            />
-            <Text style={styles.recommendationButtonText}>
-              Get Fresh Recommendations
-            </Text>
+          <TouchableOpacity onPress={handleSignOut}>
+            <Ionicons name="log-out-outline" size={28} color={Colors.dark.text} />
           </TouchableOpacity>
         </View>
-
-        <View style={styles.playlistsHeader}>
-          <Text style={styles.playlistsTitle}>Playlists</Text>
+        <View style={styles.suggestionsCard}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <MaterialCommunityIcons name="star-four-points-outline" size={24} color="white" />
+            <Text style={styles.suggestionsTitle}>Personalized Suggestions</Text>
+          </View>
+          <Text style={styles.suggestionsSubtitle}>
+            Our AI will recommend songs based on your listening history. The more you listen, the
+            better the recommendations.
+          </Text>
         </View>
-
-        <FlatList
-          data={playlists}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.playlistsContainer}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.playlistCard}>
-              <Image source={{ uri: item.image }} style={styles.playlistImage} />
-              <Text style={styles.playlistTitle}>{item.title}</Text>
-              <Text style={styles.playlistDescription}>{item.description}</Text>
+        <TouchableOpacity style={styles.suggestionsButton}>
+          <MaterialCommunityIcons name="star-four-points-outline" size={24} color="white" />
+          <Text style={styles.suggestionsButtonText}>Get Fresh Recommendations</Text>
+        </TouchableOpacity>
+        <View style={styles.divider} />
+        <Text style={styles.playlistsTitle}>Playlists</Text>
+        <View style={styles.playlistsGrid}>
+          {playlists.map((playlist, index) => (
+            <View key={index} style={styles.playlistItem}>
+              <Image source={{ uri: playlist.image }} style={styles.playlistImage} />
+              <Text style={styles.playlistItemTitle}>{playlist.title}</Text>
+              <Text style={styles.playlistItemSubtitle}>{playlist.subtitle}</Text>
             </View>
-          )}
-        />
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -99,86 +89,85 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.dark.background,
+    paddingHorizontal: 16,
   },
-  headerContainer: {
-    padding: 20,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 24,
+    marginBottom: 16,
   },
   headerTitle: {
-    fontSize: 24,
-    color: Colors.dark.text,
+    fontSize: 28,
     fontFamily: Fonts.bold,
+    color: Colors.dark.text,
   },
-  recommendationCard: {
-    backgroundColor: Colors.dark.background,
-    borderRadius: 10,
-    padding: 15,
-    marginHorizontal: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: Colors.dark.text,
+  suggestionsCard: {
+    backgroundColor: '#1C1C1E',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
   },
-  recommendationHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  recommendationTitle: {
+  suggestionsTitle: {
     fontSize: 18,
-    color: Colors.dark.text,
-    marginLeft: 10,
     fontFamily: Fonts.bold,
-  },
-  recommendationText: {
-    fontSize: 14,
     color: Colors.dark.text,
-    marginBottom: 15,
-    fontFamily: Fonts.regular,
   },
-  recommendationButton: {
+  suggestionsSubtitle: {
+    fontSize: 14,
+    fontFamily: Fonts.regular,
+    color: '#8E8E93',
+    marginTop: 8,
+  },
+  suggestionsButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.light.tint,
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
     justifyContent: 'center',
+    backgroundColor: '#3A3A3C',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 10,
   },
-  recommendationButtonText: {
+  suggestionsButtonText: {
     fontSize: 16,
-    color: Colors.dark.text,
-    marginLeft: 10,
     fontFamily: Fonts.bold,
+    color: Colors.dark.text,
   },
-  playlistsHeader: {
-    paddingHorizontal: 20,
-    marginBottom: 10,
+  divider: {
+    height: 1,
+    backgroundColor: '#2C2C2E',
+    marginVertical: 24,
   },
   playlistsTitle: {
     fontSize: 22,
-    color: Colors.dark.text,
     fontFamily: Fonts.bold,
+    color: Colors.dark.text,
+    marginBottom: 16,
   },
-  playlistsContainer: {
-    paddingLeft: 20,
+  playlistsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
-  playlistCard: {
-    marginRight: 15,
-    width: 160,
+  playlistItem: {
+    width: '48%',
+    marginBottom: 16,
   },
   playlistImage: {
-    width: 160,
-    height: 160,
-    borderRadius: 10,
-    marginBottom: 10,
+    width: '100%',
+    height: 150,
+    borderRadius: 8,
   },
-  playlistTitle: {
+  playlistItemTitle: {
     fontSize: 16,
-    color: Colors.dark.text,
     fontFamily: Fonts.bold,
-  },
-  playlistDescription: {
-    fontSize: 12,
     color: Colors.dark.text,
+    marginTop: 8,
+  },
+  playlistItemSubtitle: {
+    fontSize: 12,
     fontFamily: Fonts.regular,
+    color: '#8E8E93',
   },
 });

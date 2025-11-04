@@ -2,8 +2,8 @@
 import { Colors } from '@/constants/Colors';
 import { Fonts } from '@/constants/Fonts';
 import { useTheme } from '@react-navigation/native';
-import { Link } from 'expo-router';
-import React from 'react';
+import { Link, useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -16,9 +16,32 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase';
+import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 
-const signup = () => {
+const Signup = () => {
   const { dark } = useTheme();
+  const router = useRouter();
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { signIn: googleSignIn, loading: googleLoading } = useGoogleSignIn();
+
+  const handleSignUp = async () => {
+    if (username && email && password) {
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        router.replace('/(tabs)');
+      } catch (err: any) {
+        setError(err.message);
+      }
+    } else {
+      setError('Please fill in all fields.');
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -42,7 +65,10 @@ const signup = () => {
           </View>
           <Text style={styles.title}>Create your Streamvibely account</Text>
           <Text style={styles.subtitle}>Get started for free</Text>
-          <TouchableOpacity style={styles.googleButton}>
+          <TouchableOpacity
+            style={styles.googleButton}
+            onPress={googleSignIn}
+            disabled={googleLoading}>
             <Image
               source={{
                 uri: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
@@ -64,6 +90,8 @@ const signup = () => {
               placeholder="Your username"
               placeholderTextColor={Colors.dark.text}
               autoCapitalize="none"
+              value={username}
+              onChangeText={setUsername}
             />
           </View>
 
@@ -75,6 +103,8 @@ const signup = () => {
               placeholderTextColor={Colors.dark.text}
               keyboardType="email-address"
               autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
             />
           </View>
 
@@ -85,15 +115,19 @@ const signup = () => {
               placeholder="************"
               placeholderTextColor={Colors.dark.text}
               secureTextEntry
+              value={password}
+              onChangeText={setPassword}
             />
           </View>
 
-          <TouchableOpacity style={styles.signInButton}>
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+          <TouchableOpacity style={styles.signInButton} onPress={handleSignUp}>
             <Text style={styles.signInButtonText}>Create Account</Text>
           </TouchableOpacity>
           <View style={styles.signUpContainer}>
             <Text style={styles.signUpText}>Already have an account?</Text>
-            <Link href="/login" asChild>
+            <Link href="/(auth)/login" asChild>
               <Text style={styles.signUpLink}> Sign in</Text>
             </Link>
           </View>
@@ -103,7 +137,7 @@ const signup = () => {
   );
 };
 
-export default signup;
+export default Signup;
 
 const styles = StyleSheet.create({
   container: {
@@ -208,5 +242,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.tint,
     fontFamily: Fonts.bold,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
+    fontFamily: Fonts.regular,
   },
 });

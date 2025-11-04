@@ -1,25 +1,38 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import React, { useEffect, useState } from 'react';
+import { Slot, useRouter, useSegments } from 'expo-router';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../firebase';
+import { SplashScreen } from 'expo-router';
 
-export const unstable_settings = {
-  anchor: '(tabs)',
+SplashScreen.preventAutoHideAsync();
+
+const RootLayout = () => {
+  const router = useRouter();
+  const segments = useSegments();
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const inAuthGroup = segments[0] === '(auth)';
+
+      if (user && !inAuthGroup) {
+        router.replace('/(tabs)');
+      } else if (!user) {
+        router.replace('/(auth)/login');
+      }
+      setInitialized(true);
+    });
+    return unsubscribe;
+  }, [segments, router]);
+
+  useEffect(() => {
+    if (initialized) {
+      SplashScreen.hideAsync();
+    }
+  }, [initialized]);
+
+  return initialized ? <Slot /> : null;
 };
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
-}
+export default RootLayout;

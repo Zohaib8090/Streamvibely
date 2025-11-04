@@ -2,8 +2,8 @@
 import { Colors } from '@/constants/Colors';
 import { Fonts } from '@/constants/Fonts';
 import { useTheme } from '@react-navigation/native';
-import { Link } from 'expo-router';
-import React from 'react';
+import { Link, useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import {
   Image,
   KeyboardAvoidingView,
@@ -16,9 +16,31 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase';
+import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 
-const login = () => {
+const Login = () => {
   const { dark } = useTheme();
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { signIn: googleSignIn, loading: googleLoading } = useGoogleSignIn();
+
+  const handleLogin = async () => {
+    if (email && password) {
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        router.replace('/(tabs)');
+      } catch (err: any) {
+        setError(err.message);
+      }
+    } else {
+      setError('Please enter both email and password.');
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -42,7 +64,10 @@ const login = () => {
           </View>
           <Text style={styles.title}>Welcome back to Streamvibely</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
-          <TouchableOpacity style={styles.googleButton}>
+          <TouchableOpacity
+            style={styles.googleButton}
+            onPress={googleSignIn}
+            disabled={googleLoading}>
             <Image
               source={{
                 uri: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
@@ -65,6 +90,8 @@ const login = () => {
               placeholderTextColor={Colors.dark.text}
               keyboardType="email-address"
               autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
             />
           </View>
 
@@ -80,15 +107,19 @@ const login = () => {
               placeholder="************"
               placeholderTextColor={Colors.dark.text}
               secureTextEntry
+              value={password}
+              onChangeText={setPassword}
             />
           </View>
 
-          <TouchableOpacity style={styles.signInButton}>
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+          <TouchableOpacity style={styles.signInButton} onPress={handleLogin}>
             <Text style={styles.signInButtonText}>Sign In</Text>
           </TouchableOpacity>
           <View style={styles.signUpContainer}>
             <Text style={styles.signUpText}>Don't have an account?</Text>
-            <Link href="/signup" asChild>
+            <Link href="/(auth)/signup" asChild>
               <Text style={styles.signUpLink}> Sign up</Text>
             </Link>
           </View>
@@ -98,7 +129,7 @@ const login = () => {
   );
 };
 
-export default login;
+export default Login;
 
 const styles = StyleSheet.create({
   container: {
@@ -213,5 +244,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.light.tint,
     fontFamily: Fonts.bold,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
+    fontFamily: Fonts.regular,
   },
 });
