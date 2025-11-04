@@ -20,7 +20,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.streamvibely"
+      "package": "com.zohaibbaig.streamvibely"
     },
     "web": {
       "output": "static",
