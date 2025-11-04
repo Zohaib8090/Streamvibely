@@ -1,4 +1,3 @@
-
 name: Get SHA-1 Fingerprint
 
 on:
@@ -24,7 +23,12 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo "Decoding keystore..."
-          echo "$KEYSTORE_B64" | tr -d '\n' | base64 -d > my-release-key.keystore
+          # Save the secret to a file to handle potential formatting issues
+          echo "$KEYSTORE_B64" > keystore.b64.txt
+          # Remove all newline and carriage return characters from the file
+          sed -i 's/[\r\n]//g' keystore.b64.txt
+          # Decode the cleaned file
+          base64 -d keystore.b64.txt > my-release-key.keystore
           echo "Keystore decoded. Extracting SHA-1 fingerprint..."
           FINGERPRINT=$(keytool -list -v -keystore my-release-key.keystore -alias "$KEY_ALIAS" -storepass "$KEY_PASSWORD")
           echo "::notice title=SHA-1 Fingerprint::$(echo "$FINGERPRINT" | grep "SHA1:")"
