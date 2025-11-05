@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDYrdSEqMAKgkCGEJsarQ1O76PQUyXH4qg",
+  apiKey: "AIzaSyDiAKXm9sOrjPmKb0qgY6h4jQ-f763NDZM",
   authDomain: "streamvibely.firebaseapp.com",
   projectId: "streamvibely",
   storageBucket: "streamvibely.firebasestorage.app",
