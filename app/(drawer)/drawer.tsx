@@ -1,0 +1,76 @@
+
+import { Colors } from '@/constants/Colors';
+import { Fonts } from '@/constants/Fonts';
+import { auth } from '@/firebase';
+import {
+  DrawerContentScrollView,
+  DrawerItem, 
+  DrawerItemList,
+} from '@react-navigation/drawer';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Text, View, StyleSheet } from 'react-native';
+
+const CustomDrawerContent = (props: any) => {
+  const router = useRouter();
+  const handleSignOut = async () => {
+    await auth.signOut();
+    router.replace('/(auth)/login');
+  };
+
+  return (
+    <DrawerContentScrollView {...props} style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Menu</Text>
+      </View>
+      <DrawerItemList {...props} />
+      <DrawerItem
+        label="View Profile"
+        onPress={() => {}}
+        labelStyle={styles.drawerItemLabel}
+        icon={({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />}
+      />
+      <DrawerItem
+        label="What's new"
+        onPress={() => {}}
+        labelStyle={styles.drawerItemLabel}
+        icon={({ color, size }) => <Ionicons name="notifications-outline" size={size} color={color} />}
+      />
+      <DrawerItem
+        label="Settings"
+        onPress={() => {}}
+        labelStyle={styles.drawerItemLabel}
+        icon={({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />}
+      />
+      <DrawerItem
+        label="Logout"
+        onPress={handleSignOut}
+        labelStyle={styles.drawerItemLabel}
+        icon={({ color, size }) => <Ionicons name="log-out-outline" size={size} color={color} />}
+      />
+    </DrawerContentScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.dark.background,
+  },
+  header: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.dark.text,
+  },
+  headerText: {
+    color: Colors.dark.text,
+    fontSize: 20,
+    fontFamily: Fonts.bold,
+  },
+  drawerItemLabel: {
+    color: Colors.dark.text,
+    fontFamily: Fonts.regular,
+  },
+});
+
+export default CustomDrawerContent;

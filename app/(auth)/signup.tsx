@@ -30,7 +30,7 @@ const Signup = () => {
     if (email && password) {
       try {
         await createUserWithEmailAndPassword(auth, email, password);
-        router.replace('/(tabs)');
+        router.replace('/(drawer)/(tabs)');
       } catch (err: any) {
         setError(err.message);
       }

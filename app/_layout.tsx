@@ -1,60 +1,31 @@
 
-import React, { useEffect, useState } from 'react';
-import { Slot, useRouter, useSegments, useRootNavigationState } from 'expo-router';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '../firebase';
-import { SplashScreen } from 'expo-router';
+import { useAuth } from '../hooks/useAuth';
+import { Slot, useRouter, useSegments } from 'expo-router';
+import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-SplashScreen.preventAutoHideAsync();
-
-const RootLayout = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [authInitialized, setAuthInitialized] = useState(false);
+const InitialLayout = () => {
+  const { user, initialized } = useAuth();
   const segments = useSegments();
   const router = useRouter();
-  const navigationState = useRootNavigationState();
 
-  // Effect for checking authentication state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (!authInitialized) {
-        setAuthInitialized(true);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Effect for navigation
-  useEffect(() => {
-    if (!navigationState?.key || !authInitialized) {
-      return;
-    }
+    if (!initialized) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
-    if (user && inAuthGroup) {
-      // Logged in, but on auth screen -> redirect to app
-      router.replace('/(tabs)');
-    } else if (!user && !inAuthGroup) {
-      // Not logged in and not in auth group -> redirect to login.
+    if (user && !inAuthGroup) {
+      router.replace('/(drawer)/(tabs)');
+    } else if (!user) {
       router.replace('/(auth)/login');
     }
-  }, [user, authInitialized, segments, router, navigationState]);
+  }, [user, initialized]);
 
-  // Hide splash screen once auth is initialized and navigation is ready
-  useEffect(() => {
-    if (authInitialized && navigationState?.key) {
-      SplashScreen.hideAsync();
-    }
-  }, [authInitialized, navigationState]);
-
-  // Render a loading indicator or null until everything is ready
-  if (!authInitialized || !navigationState?.key) {
-    return null;
-  }
-
-  return <Slot />;
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Slot />
+    </GestureHandlerRootView>
+  );
 };
 
-export default RootLayout;
+export default InitialLayout;

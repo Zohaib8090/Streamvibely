@@ -32,7 +32,7 @@ const Login = () => {
     if (email && password) {
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        router.replace('/(tabs)');
+        router.replace('/(drawer)/(tabs)');
       } catch (err: any) {
         setError(err.message);
       }
@@ -42,7 +42,7 @@ const Login = () => {
   };
 
   const handleGuestLogin = () => {
-    router.replace('/(tabs)');
+    router.replace('/(drawer)/(tabs)');
   };
 
   return (
