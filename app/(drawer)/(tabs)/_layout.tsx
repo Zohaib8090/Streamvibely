@@ -11,11 +11,11 @@ const TabsLayout = () => {
 
   return (
     <Tabs>
-      <Tabs.Screen name="index" options={{ headerShown: false }} />
-      <Tabs.Screen name="create-playlist" />
       <Tabs.Screen
-        name="library"
+        name="index"
         options={{
+          headerShown: true,
+          title: 'Home',
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
@@ -26,7 +26,15 @@ const TabsLayout = () => {
           ),
         }}
       />
-      <Tabs.Screen name="search" />
+      <Tabs.Screen name="search" options={{ headerShown: false, title: 'Search' }} />
+      <Tabs.Screen
+        name="library"
+        options={{
+          headerShown: false,
+          title: 'Library',
+        }}
+      />
+      <Tabs.Screen name="create-playlist" options={{ headerShown: false, title: 'Create Playlist' }} />
     </Tabs>
   );
 };
