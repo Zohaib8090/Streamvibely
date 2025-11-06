@@ -26,7 +26,7 @@ const CustomDrawerContent = (props: any) => {
       <DrawerItemList {...props} />
       <DrawerItem
         label="View Profile"
-        onPress={() => {}}
+        onPress={() => router.push('/(drawer)/profile')}
         labelStyle={styles.drawerItemLabel}
         icon={({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />}
       />

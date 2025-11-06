@@ -6,7 +6,13 @@ const DrawerLayout = () => {
   return (
     <Drawer
       drawerContent={(props) => <CustomDrawerContent {...props} />}
-      screenOptions={{ headerShown: false }}
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        drawerItemStyle:
+          route.name === '(tabs)' || route.name === 'drawer'
+            ? { display: 'none' }
+            : {},
+      })}
     />
   );
 };
